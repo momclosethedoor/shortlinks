@@ -1,0 +1,77 @@
+{% load static %}
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Shortlink</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <div class="center">
+        <div id='result' class='d-none'>
+            <div id='shortlink'>
+            </div>
+            <div id='extra_buttons'>
+                <button id='repeat_button' type="submit" class="btn btn-light">ЕЩЁ</button>
+                <a href="{% url 'links_list' %}?page=1" class="btn btn-light">Список всех ссылок -></a>
+            </div>
+        </div>
+        <form id='get_shortlink'>
+            <div class="form-outline" data-mdb-input-init>
+                <h1><label class="form-label" for="typeURL">Введите ссылку, чтобы её укоротить</label></h1>
+                <input type="url" id="typeURL" class="form-control" />
+              </div>
+            <button id='send_button' type="submit" class="btn btn-light">Получить shortlink!</button>
+            <a href="{% url 'links_list' %}?page=1" class="btn btn-light">Список всех ссылок -></a>
+        </form>
+    </div>
+</body>
+</html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    const butt = document.querySelector("#send_button");
+    const butt_repeat = document.querySelector("#repeat_button");
+    const url = document.querySelector("#typeURL");
+
+    butt.addEventListener("click", buttClick, false);
+    butt_repeat.addEventListener("click", buttRepeatClick, false);
+
+
+    function buttRepeatClick(event) {
+        event.preventDefault();
+        $( "#result" ).addClass('d-none');
+        $( "form" ).removeClass('d-none');
+    };
+
+    function buttClick(event) {
+        event.preventDefault();
+        if (isUrlValid(url.value) == true) {
+            $.ajax({
+                url: "/shortlinks/create",
+                method: 'POST',
+                dataType: 'json',
+                data: {url: url.value},
+                success: function( result ) {
+                  $( "form" ).addClass('d-none');
+                  $( "#shortlink" ).html( "<h1>Ваша ссылка <strong><a href='" + result['shortlink'] + "'>"+ result['shortlink'] +"</a></strong></h1>" );
+                  $( "#result" ).removeClass('d-none');
+                  url.value = '';
+                  url.classList.remove("is-invalid");
+                }
+              });
+        } else {
+            url.classList.add("is-invalid");
+        } 
+      }
+
+    function isUrlValid(userInput) {
+      var res = userInput.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+      if(res == null)
+          return false;
+      else
+          return true;
+    }
+</script>
