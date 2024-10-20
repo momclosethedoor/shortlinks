@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic import View
 from django.http import JsonResponse, HttpResponseNotFound
 from django.template.response import TemplateResponse
+from django.urls.exceptions import NoReverseMatch
 
 from .utils import *
 
@@ -12,7 +13,10 @@ def get_url(request, key_url):
     url = get_url_by_key(key_url)
     if url is None:
         return HttpResponseNotFound('INVALID LINK')
-    return redirect(url)
+    try:
+        return redirect(url)
+    except NoReverseMatch:
+        return HttpResponseNotFound('INVALID LINK')
 
 def links_list(request):
     context = {}
